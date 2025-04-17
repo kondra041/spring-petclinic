@@ -152,4 +152,30 @@ class PetController {
 		return "redirect:/owners/{ownerId}";
 	}
 
+
+	@PostMapping("/pets/{petId}/delete")
+public ResponseEntity<String> deletePet(
+        @RequestHeader(value = "Authorization", required = false) String authHeader,
+        @PathVariable("ownerId") int ownerId,
+        @PathVariable("petId") int petId) {
+
+    if (!isValidToken(authHeader)) {
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body("Unauthorized: Invalid or missing token");
+    }
+
+    Owner owner = this.findOwner(ownerId);
+    Pet optionalPet = this.findPet(ownerId, petId);
+
+    if (optionalPet == null) {
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body("Pet with ID " + petId + " not found");
+    }
+
+    owner.deletePet(optionalPet);
+    return ResponseEntity.ok("Pet with ID " + petId + " was successfully deleted");
+}
+
 }
